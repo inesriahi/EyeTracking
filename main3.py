@@ -48,8 +48,26 @@ def process_eye(eye_frame, threshold):
 
     return small_eye
 
-# def best_threshold():
-#     return
+
+def iris_size(eye_frame):
+    frame = eye_frame[margin:-margin,margin:-margin]
+    h, w = frame.shape[:2]
+    n_pixels = h * w
+    n_blocks = n_pixels - cv2.countNonZero(frame)
+    return n_blocks / n_pixels
+
+
+def best_threshold(eye_frame):
+    average_iris_size = 0.48
+    trials = {}
+
+    for threshold in range(5,100,5):
+        iris_frame = process_eye(eye_frame, threshold)
+        trials[threshold] = iris_size(iris_frame)
+
+    best_thresh, best_iris_size = min(trials.items(), key=(lambda p: abs(p[1]-average_iris_size)))
+
+    return best_thresh
 
 
 while True:
