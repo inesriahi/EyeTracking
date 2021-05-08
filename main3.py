@@ -32,29 +32,41 @@ while True:
 
         margin = 5
 
-        cv2.imshow("Left Eye Masked", left_eye_masked)
         min_x = np.min(left_eye_region[:, 0]) - margin
         max_x = np.max(left_eye_region[:, 0]) + margin
         min_y = np.min(left_eye_region[:, 1]) - margin
         max_y = np.max(left_eye_region[:, 1]) + margin
 
-        kernel = np.ones((3,3), np.uint8)
-        iris_frame = cv2.bilateralFilter(left_eye_masked, 10,15,15)
-        iris_frame = cv2.erode(iris_frame, kernel, iterations=3)
-        _,iris_frame = cv2.threshold(iris_frame, 70,255,cv2.THRESH_BINARY)
-        cv2.imshow("Iris Frame", iris_frame)
-
-
+        #
+        # kernel = np.ones((3,3), np.uint8)
+        # iris_frame = cv2.bilateralFilter(left_eye_masked, 10,15,15)
+        # iris_frame = cv2.erode(iris_frame, kernel, iterations=3)
+        # _,iris_frame = cv2.threshold(iris_frame, 70,255,cv2.THRESH_BINARY)
+        # cv2.imshow("Iris Frame", iris_frame)
 
         ## Eye
-        eye = left_eye_masked[min_y:max_y, min_x:max_x]
-        eye = cv2.resize(eye, None, fx=5, fy=5)
+        # Get the only the eye from the masked frame (with eye and white background)
+        small_eye = left_eye_masked[min_y:max_y, min_x:max_x]
+        cv2.imshow("Left Eye Masked Small Eye", small_eye)
+        # Enlarge the eye size
+        eye = cv2.resize(small_eye, None, fx=5, fy=5)
+        # Threshold the Eye to get the iris in black with white background
         _,eye = cv2.threshold(eye, 70,255,cv2.THRESH_BINARY)
 
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(21,21))
+        # Get an ellipse SE
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(15,15))
+        # Perform Closing operation to close small holes
         closing = cv2.morphologyEx(eye, cv2.MORPH_CLOSE, kernel)
-        cv2.imshow("Eye", eye)
 
+        # Get the original eye size by reducing its size
+        small_eye = cv2.resize(closing, None, fx=1/5, fy=1/5)
+        # Show the thresholded iris area in its original size
+        cv2.imshow("Small Eye resized", small_eye)
+
+        ## Frame reconstruction to replace the thresholded iris in its frame
+        white_frame = np.full(gray.shape, 255, np.uint8)
+        white_frame[min_y:max_y, min_x:max_x] = small_eye
+        cv2.imshow("Reconstructed Frame", white_frame)
 
 
     cv2.imshow("Frame", frame)
