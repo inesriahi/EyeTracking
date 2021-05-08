@@ -31,6 +31,26 @@ def get_blinking_ratio(eye_points, facial_landmarks):
     ratio = hor_line_length / ver_line_length
     return ratio
 
+def process_eye(eye_frame, threshold):
+    # Enlarge the eye size
+    eye = cv2.resize(eye_frame, None, fx=5, fy=5)
+    # Threshold the Eye to get the iris in black with white background
+    _, eye = cv2.threshold(eye, threshold, 255, cv2.THRESH_BINARY)
+
+    # Get an ellipse SE
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    # Perform Closing operation to close small holes
+    closing = cv2.morphologyEx(eye, cv2.MORPH_CLOSE, kernel)
+
+    # Get the original eye size by reducing its size
+    small_eye = cv2.resize(closing, None, fx=1 / 5, fy=1 / 5)
+
+    return small_eye
+
+# def best_threshold():
+#     return
+
+
 while True:
     _, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -72,18 +92,8 @@ while True:
         small_eye = left_eye_masked[min_y:max_y, min_x:max_x]
         cv2.imshow("Left Eye Masked Small Eye", small_eye)
 
-        # Enlarge the eye size
-        eye = cv2.resize(small_eye, None, fx=5, fy=5)
-        # Threshold the Eye to get the iris in black with white background
-        _,eye = cv2.threshold(eye, 70,255,cv2.THRESH_BINARY)
+        small_eye = process_eye(small_eye, 70)
 
-        # Get an ellipse SE
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(15,15))
-        # Perform Closing operation to close small holes
-        closing = cv2.morphologyEx(eye, cv2.MORPH_CLOSE, kernel)
-
-        # Get the original eye size by reducing its size
-        small_eye = cv2.resize(closing, None, fx=1/5, fy=1/5)
         # Show the thresholded iris area in its original size
         cv2.imshow("Small Eye resized", small_eye)
 
