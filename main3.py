@@ -7,7 +7,29 @@ cap = cv2.VideoCapture(0)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
+def midpoint(p1, p2):
+    return (p1.x+p2.x)//2, (p1.y+p2.y)//2
 
+def distance(p1,p2):
+    x_diff = p1[0] - p2[0]
+    y_diff = p1[1] - p2[1]
+    return np.sqrt(x_diff*x_diff + y_diff*y_diff)
+
+def get_blinking_ratio(eye_points, facial_landmarks):
+    left_point = (facial_landmarks.part(eye_points[0]).x, facial_landmarks.part(eye_points[0]).y)
+    right_point = (facial_landmarks.part(eye_points[3]).x, facial_landmarks.part(eye_points[3]).y)
+
+    center_top = midpoint(facial_landmarks.part(eye_points[1]), facial_landmarks.part(eye_points[2]))
+    center_bottom = midpoint(facial_landmarks.part(eye_points[5]), facial_landmarks.part(eye_points[4]))
+
+    # hor_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2)
+    # ver_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
+
+    ver_line_length = distance(center_top, center_bottom)
+    hor_line_length = distance(left_point, right_point)
+
+    ratio = hor_line_length / ver_line_length
+    return ratio
 
 while True:
     _, frame = cap.read()
@@ -88,6 +110,14 @@ while True:
             cv2.circle(frame, (cX, cY), 2, (0,255,0),-1)
             cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30,50), 0,0.5,(0,0,0))
             break
+
+        ### Detect Blinking
+        left_eye_ratio = get_blinking_ratio(list(range(36,42)), landmarks)
+        right_eye_ratio = get_blinking_ratio(list(range(42,48)), landmarks)
+        blinking_ratio = (left_eye_ratio + right_eye_ratio) / 2
+
+        if blinking_ratio > 5.5:
+            cv2.putText(frame, "Blinking", (30,100), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
 
 
         cv2.imshow('Black Bg', black_bg)
