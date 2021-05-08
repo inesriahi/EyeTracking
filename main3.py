@@ -5,6 +5,7 @@ import cv2
 
 cap = cv2.VideoCapture(0)
 
+margin = 5
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 def midpoint(p1, p2):
@@ -73,26 +74,17 @@ while True:
         left_eye_masked = cv2.bitwise_not(black_frame, gray.copy(),mask=mask)
         # cv2.imshow("", left_eye_masked)
 
-        margin = 5
-
         min_x = np.min(left_eye_region[:, 0]) - margin
         max_x = np.max(left_eye_region[:, 0]) + margin
         min_y = np.min(left_eye_region[:, 1]) - margin
         max_y = np.max(left_eye_region[:, 1]) + margin
-
-        #
-        # kernel = np.ones((3,3), np.uint8)
-        # iris_frame = cv2.bilateralFilter(left_eye_masked, 10,15,15)
-        # iris_frame = cv2.erode(iris_frame, kernel, iterations=3)
-        # _,iris_frame = cv2.threshold(iris_frame, 70,255,cv2.THRESH_BINARY)
-        # cv2.imshow("Iris Frame", iris_frame)
 
         ## Eye
         # Get the only the eye from the masked frame (with eye and white background)
         small_eye = left_eye_masked[min_y:max_y, min_x:max_x]
         cv2.imshow("Left Eye Masked Small Eye", small_eye)
 
-        small_eye = process_eye(small_eye, 70)
+        small_eye = process_eye(small_eye, best_threshold(small_eye))
 
         # Show the thresholded iris area in its original size
         cv2.imshow("Small Eye resized", small_eye)
