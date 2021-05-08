@@ -29,6 +29,7 @@ while True:
         # cv2.polylines(mask,[left_eye_region], True, 255)
         cv2.fillPoly(mask, [left_eye_region], (0,0,0))
         left_eye_masked = cv2.bitwise_not(black_frame, gray.copy(),mask=mask)
+        # cv2.imshow("", left_eye_masked)
 
         margin = 5
 
@@ -48,6 +49,7 @@ while True:
         # Get the only the eye from the masked frame (with eye and white background)
         small_eye = left_eye_masked[min_y:max_y, min_x:max_x]
         cv2.imshow("Left Eye Masked Small Eye", small_eye)
+
         # Enlarge the eye size
         eye = cv2.resize(small_eye, None, fx=5, fy=5)
         # Threshold the Eye to get the iris in black with white background
@@ -68,6 +70,25 @@ while True:
         white_frame[min_y:max_y, min_x:max_x] = small_eye
         cv2.imshow("Reconstructed Frame", white_frame)
 
+        # Invert the image to make the iris white as it is the object
+        black_bg = cv2.bitwise_not(white_frame)
+        ## Finding Contours
+        contours, _ = cv2.findContours(black_bg.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=lambda c: cv2.contourArea(c), reverse=True)
+
+        ## for each contour
+        for cnt in contours:
+            # compute the center of the contour
+            M = cv2.moments(cnt)
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+
+            #draw the contour and center of the shape on the image
+            cv2.drawContours(black_bg, [cnt], -1, (0,255,0), 2)
+            cv2.circle(frame, (cX, cY), 2, (0,255,0),-1)
+
+
+        cv2.imshow('Black Bg', black_bg)
 
     cv2.imshow("Frame", frame)
 
