@@ -86,6 +86,8 @@ while True:
             #draw the contour and center of the shape on the image
             cv2.drawContours(black_bg, [cnt], -1, (0,255,0), 2)
             cv2.circle(frame, (cX, cY), 2, (0,255,0),-1)
+            cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30,50), 0,0.5,(0,0,0))
+            break
 
 
         cv2.imshow('Black Bg', black_bg)
