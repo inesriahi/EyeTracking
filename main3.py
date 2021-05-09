@@ -101,11 +101,29 @@ def eye_direction_distance(landmarks, pupil):
 
     return angle, dist
 
+def get_direction_description(detected_angle, detected_distance):
+    if detected_distance < 3.5:
+        return "center"
+    directions = {
+        "top" : 90,
+        "bottom" : -90,
+        "right" : 180,
+        "left" : 0,
+        "top_right" : 135,
+        "bottom_right" : -135,
+        "top_left" :  45,
+        "bottom_left" : -45
+    }
+
+    dir_name, nearest_anchor = min(directions.items(), key=(lambda a: abs(detected_angle - a[1])))
+    return dir_name
+
 
 while True:
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+    frame = cv2.flip(frame, 1)
+    gray = cv2.flip(gray, 1)
     if ret:
         faces = detector(gray) # array of all the faces
         for face in faces:
@@ -173,7 +191,7 @@ while True:
             blinking_ratio = (left_eye_ratio + right_eye_ratio) / 2
 
             if blinking_ratio > 5.5:
-                cv2.putText(frame, "Blinking", (30,100), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
+                cv2.putText(frame, "Blinking", (30,200), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
 
 
             eye_center = get_eye_center(landmarks)
