@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import dlib
 import cv2
@@ -58,7 +60,7 @@ def iris_size(eye_frame):
 
 
 def best_threshold(eye_frame):
-    average_iris_size = 0.48
+    average_iris_size = 0.30
     trials = {}
 
     for threshold in range(5,100,5):
@@ -68,6 +70,36 @@ def best_threshold(eye_frame):
     best_thresh, best_iris_size = min(trials.items(), key=(lambda p: abs(p[1]-average_iris_size)))
 
     return best_thresh
+
+def get_eye_center(landmarks):
+    ## TODO: Find better get center logic
+    mid_eye_x = (landmarks.part(37).x + landmarks.part(38).x) // 2
+
+    # mid_eye_x = (landmarks.part(36).x + landmarks.part(39).x)//2
+
+    # mid_upper = (landmarks.part(37).y + landmarks.part(38).y) // 2
+    # mid_lower = (landmarks.part(40).y + landmarks.part(41).y) // 2
+    # mid_eye_y = (mid_upper + mid_lower) // 2
+
+    # mid_eye_y = landmarks.part(27).y
+
+    mid_eye_y = landmarks.part(36).y
+    center = (mid_eye_x, mid_eye_y)
+
+    return center
+
+def eye_direction_distance(landmarks, pupil):
+    '''
+    Get the Eye
+    :param landmarks: The landmarks of the face
+    :param pupil: The coordinates of the Pupil
+    :return: angle in degrees and distance
+    '''
+    eyeCenter = get_eye_center(landmarks)
+    angle = math.degrees(math.atan2(eyeCenter[1]-pupil[1], eyeCenter[0]-pupil[0]))
+    dist = distance(pupil,eyeCenter)
+
+    return angle, dist
 
 
 while True:
@@ -120,17 +152,20 @@ while True:
             contours = sorted(contours, key=lambda c: cv2.contourArea(c), reverse=True)
 
             ## for each contour
+
+            # compute the center of the contour
             for cnt in contours:
-                # compute the center of the contour
                 M = cv2.moments(cnt)
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
 
+                pupil = (cX, cY)
                 #draw the contour and center of the shape on the image
                 cv2.drawContours(black_bg, [cnt], -1, (0,255,0), 2)
                 cv2.circle(frame, (cX, cY), 2, (0,255,0),-1)
                 cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30,50), 0,0.5,(0,0,0))
                 break
+
 
             ### Detect Blinking
             left_eye_ratio = get_blinking_ratio(list(range(36,42)), landmarks)
@@ -141,6 +176,12 @@ while True:
                 cv2.putText(frame, "Blinking", (30,100), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
 
 
+            eye_center = get_eye_center(landmarks)
+            cv2.circle(frame, eye_center, 2, (0, 0, 255), -1)
+
+            # ##### Eye direction distance
+            angle, dist = eye_direction_distance(landmarks, pupil)
+            cv2.putText(frame, f'angle: {angle:.4f} & distance: {dist:.4f}', (30, 150), 0, 0.5, (0, 0, 0))
             cv2.imshow('Black Bg', black_bg)
 
         cv2.imshow("Frame", frame)
