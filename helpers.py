@@ -6,23 +6,43 @@ import cv2
 margin = 5
 
 def midpoint(p1, p2):
+    '''
+    Returns the coordinates of the midpoint between the two given points from the landmarks variable
+
+    :param p1: point 1
+    :param p2: point 2
+    :return: tuple containing x and y coordinates of the middle point
+    '''
     return (p1.x+p2.x)//2, (p1.y+p2.y)//2
 
 def distance(p1,p2):
+    '''
+    Returns the distance between two points represented as tuples
+
+    :param tuple p1: point 1
+    :param tuple p2: point 2
+    :return: the euclidean distance between the 2 points
+    '''
+    # calculate distance between x coordinates
     x_diff = p1[0] - p2[0]
     y_diff = p1[1] - p2[1]
     return np.sqrt(x_diff*x_diff + y_diff*y_diff)
 
 def get_blinking_ratio(eye_points, facial_landmarks):
+    '''
+    Returns the ratio between the eye's horizontal line and the vertical line
+
+    :param eye_points: list containing the points representing the eye landmarks according to dlib
+    :param facial_landmarks: landmarks of the face by dlib
+    :return: blinking ratio: the ratio between the eye's horizontal line and the vertical line
+    '''
+    # get eye's left point and right point coordinates
     left_point = (facial_landmarks.part(eye_points[0]).x, facial_landmarks.part(eye_points[0]).y)
     right_point = (facial_landmarks.part(eye_points[3]).x, facial_landmarks.part(eye_points[3]).y)
 
     center_top = midpoint(facial_landmarks.part(eye_points[1]), facial_landmarks.part(eye_points[2]))
     center_bottom = midpoint(facial_landmarks.part(eye_points[5]), facial_landmarks.part(eye_points[4]))
-
-    # hor_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2)
-    # ver_line = cv2.line(frame, center_top, center_bottom, (0, 255, 0), 2)
-
+    # compute the eye's vertical and the horizontal line length using distance() function
     ver_line_length = distance(center_top, center_bottom)
     hor_line_length = distance(left_point, right_point)
 
@@ -30,6 +50,13 @@ def get_blinking_ratio(eye_points, facial_landmarks):
     return ratio
 
 def process_eye(eye_frame, threshold):
+    '''
+    Process the eye to get the thresholded version of it
+
+    :param eye_frame: Frame containing the segmented eye using polyfill
+    :param threshold: Value for binary thresholding
+    :return: Binary thresholded eye with the same size of :param eye_frame
+    '''
     # Enlarge the eye size
     eye = cv2.resize(eye_frame, None, fx=5, fy=5)
     # Threshold the Eye to get the iris in black with white background
@@ -47,6 +74,13 @@ def process_eye(eye_frame, threshold):
 
 
 def iris_size(eye_frame):
+    '''
+    Returns the iris size: the ratio between nonzero pixels and the total size of the frame
+
+    :param eye_frame: frame containing only the binary thresholded eye
+    :return: number of nonzero pixels divided by the size of the frame
+    '''
+    # get original eye frame without margin
     frame = eye_frame[margin:-margin,margin:-margin]
     h, w = frame.shape[:2]
     n_pixels = h * w
@@ -55,6 +89,13 @@ def iris_size(eye_frame):
 
 
 def best_threshold(eye_frame):
+    '''
+    Find the best threshold for the iris evaluated its average size
+
+    :param eye_frame: Frame containing only the eye
+    :return: best found threshold to get the iris
+    '''
+    # set average iris size
     average_iris_size = 0.30
     trials = {}
 
@@ -67,6 +108,12 @@ def best_threshold(eye_frame):
     return best_thresh
 
 def get_eye_center(landmarks):
+    '''
+    Returns the left eye center
+
+    :param landmarks: face landmarks
+    :return: the x and y coordinates of the eye center
+    '''
     ## TODO: Find better get center logic
     mid_eye_x = (landmarks.part(37).x + landmarks.part(38).x) // 2
 
@@ -85,7 +132,8 @@ def get_eye_center(landmarks):
 
 def eye_direction_distance(landmarks, pupil):
     '''
-    Return the pupil angle direction and distance from the center of the eye
+    Return the pupil angle direction and distance from the center of the eye.
+
     :param landmarks: The landmarks of the face
     :param pupil: The coordinates of the Pupil
     :return: angle in degrees and distance
@@ -97,6 +145,13 @@ def eye_direction_distance(landmarks, pupil):
     return angle, dist
 
 def get_direction_description(detected_angle, detected_distance):
+    '''
+    Returns text description for the direction of looking
+
+    :param detected_angle: angle in degrees between eye center and pupil
+    :param detected_distance: distance between eye center and pupil
+    :return: text description for the position of the pupil
+    '''
     if detected_distance < 3.5:
         return "center"
     directions = {
