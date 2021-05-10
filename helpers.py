@@ -68,7 +68,7 @@ def process_eye(eye_frame, threshold):
     # Perform Closing operation to close small holes
     closing = cv2.morphologyEx(eye, cv2.MORPH_CLOSE, kernel)
 
-    # Get the original eye size by reducing its size
+    # Get the original eye size by reducing its size again
     small_eye = cv2.resize(closing, None, fx=1 / 5, fy=1 / 5)
 
     return small_eye
@@ -97,7 +97,7 @@ def best_threshold(eye_frame):
     :param eye_frame: Frame containing only the eye
     :return: best found threshold to get the iris
     '''
-    # set average iris size
+    # set average iris size (got by experimenting)
     average_iris_size = 0.30
     # trials array to choose the best from them
     trials = {}
