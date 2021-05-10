@@ -25,6 +25,7 @@ def distance(p1,p2):
     '''
     # calculate distance between x coordinates
     x_diff = p1[0] - p2[0]
+    # calculate distance between y coordinates
     y_diff = p1[1] - p2[1]
     return np.sqrt(x_diff*x_diff + y_diff*y_diff)
 
@@ -39,13 +40,13 @@ def get_blinking_ratio(eye_points, facial_landmarks):
     # get eye's left point and right point coordinates
     left_point = (facial_landmarks.part(eye_points[0]).x, facial_landmarks.part(eye_points[0]).y)
     right_point = (facial_landmarks.part(eye_points[3]).x, facial_landmarks.part(eye_points[3]).y)
-
+    # calculate the eye's top center and bottom center using midpoint() function
     center_top = midpoint(facial_landmarks.part(eye_points[1]), facial_landmarks.part(eye_points[2]))
     center_bottom = midpoint(facial_landmarks.part(eye_points[5]), facial_landmarks.part(eye_points[4]))
     # compute the eye's vertical and the horizontal line length using distance() function
     ver_line_length = distance(center_top, center_bottom)
     hor_line_length = distance(left_point, right_point)
-
+    # get the blink ratio by dividing eye's horizontal line by the vertical line and return it
     ratio = hor_line_length / ver_line_length
     return ratio
 
@@ -83,6 +84,7 @@ def iris_size(eye_frame):
     # get original eye frame without margin
     frame = eye_frame[margin:-margin,margin:-margin]
     h, w = frame.shape[:2]
+    # calculate the iris size by getting the ratio between nonzero pixels (iris pixels) and the whole frame pixels
     n_pixels = h * w
     n_blocks = n_pixels - cv2.countNonZero(frame)
     return n_blocks / n_pixels
@@ -97,6 +99,7 @@ def best_threshold(eye_frame):
     '''
     # set average iris size
     average_iris_size = 0.30
+    # trials array to choose the best from them
     trials = {}
 
     for threshold in range(5,100,5):
