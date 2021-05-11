@@ -3,6 +3,7 @@ import numpy as np
 import dlib
 import cv2
 
+# Define Constants
 margin = 5
 
 def midpoint(p1, p2):
