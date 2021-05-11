@@ -142,6 +142,8 @@ while True:
         #             Yr = 0
 
         cv2.imshow("Weight", weight)
+        cv2.imshow("X Gradient", grad_x)
+        cv2.imshow("Y Gradient", grad_y)
 
 
 

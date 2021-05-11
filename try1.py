@@ -1,4 +1,6 @@
 import os
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -104,6 +106,9 @@ for i in range(len(all_files)):
                 # cv2.drawContours(black_bg, [cnt], -1, (0, 255, 0), 2)
                 # cv2.circle(frame, (cX, cY), 2, (0, 255, 0), -1)
                 # cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30, 50), 0, 0.5, (0, 0, 0))
+
+                # find radius of minimum enclosing circle
+                (x_min_enclosing_circle, y_min_enclosing_circle), radius = cv2.minEnclosingCircle(cnt)
                 break
 
         if not found:
@@ -120,7 +125,8 @@ for i in range(len(all_files)):
         # count -= 1
         # if count == 0:
         #     break
-        errors.append(distance(detected_pupil, real_pupil))
+
+        errors.append(distance(detected_pupil, real_pupil)/radius)
 
 errors = np.array(errors)
 print('Number of images:',errors.shape)
@@ -128,11 +134,15 @@ print('Max error:', errors.max())
 print('Min error:', errors.min())
 print('Quantiles:', np.quantile(errors, [0.25,0.5,.75]))
 hist = sns.histplot(errors, color='salmon')
-hist.set(xlim=(0,20))
+# hist.set(xlim=(0,30))
 plt.xlabel('Error (Euclidean distance between real and predicted pupil)')
 # plt.xticks(range(0,5))
 # plt.xlim(0,6)
 plt.show()
+
+# hist = sns.histplot(errors, color='salmon', log_scale=True)
+# plt.xlabel('Log-scale Error (Euclidean distance between real and predicted pupil)')
+# plt.show()
 # Calculating the error
 # print(all_files[i + 1] + ': Detected Pupil:', detected_pupil, 'Real Pupil:', real_pupil)
 
