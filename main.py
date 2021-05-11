@@ -61,10 +61,12 @@ while True:
 
             # compute the center of the contour
             for cnt in contours:
+                # Get the image moments to get the center of the image
                 M = cv2.moments(cnt)
                 cX = int(M["m10"] / M["m00"])
                 cY = int(M["m01"] / M["m00"])
 
+                # Center of the iris is the pupil
                 pupil = (cX, cY)
                 #draw the contour and center of the shape on the image
                 cv2.drawContours(black_bg, [cnt], -1, (0,255,0), 2)
@@ -76,15 +78,18 @@ while True:
             ### Detect Blinking
             left_eye_ratio = get_blinking_ratio(list(range(36,42)), landmarks)
             right_eye_ratio = get_blinking_ratio(list(range(42,48)), landmarks)
+            # find the blinking ratio as the mean between the two eye blinking ratios
             blinking_ratio = (left_eye_ratio + right_eye_ratio) / 2
 
+
+            ## if the blinking ratio is greater than this value: detect a blink
             if blinking_ratio > 5.5:
                 cv2.putText(frame, "Blinking", (30,200), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
 
             eye_center = get_eye_center(landmarks)
             cv2.circle(frame, eye_center, 2, (0, 0, 255), -1)
 
-            # ##### Eye direction distance
+            # Get looking direction distance: (pupil and eye center)
             angle, dist = eye_direction_distance(landmarks, pupil)
             cv2.putText(frame, f'angle: {angle:.4f} & distance: {dist:.3f}', (30, 100), 0, 0.5, (0, 0, 0))
             cv2.putText(frame, f'Direction: {get_direction_description(angle, dist)}', (30, 150), 0, 0.5, (0, 0, 0))
