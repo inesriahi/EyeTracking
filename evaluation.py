@@ -14,7 +14,7 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 all_files = sorted(os.listdir(dir))
 
-count = 3 #number of images to display
+count = 3  # number of images to display
 errors_by_iris_radius = []
 errors_distance = []
 
@@ -106,32 +106,34 @@ for i in range(len(all_files)):
 
                 # cv2.drawContours(black_bg, [cnt], -1, (0, 255, 0), 2)
                 cv2.circle(frame, (cX, cY), 2, (0, 255, 0), -1)
-                # cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30, 50), 0, 0.5, (0, 0, 0))
+                cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30, 50), 0, 0.5, (0, 0, 0))
 
                 # find radius of minimum enclosing circle
                 (x_min_enclosing_circle, y_min_enclosing_circle), radius = cv2.minEnclosingCircle(cnt)
                 break
 
-        # Skip the images from which no contour is detected
+        # Skip the images in which no contour is detected
         # (this is mostly because of closed eyes)
         if not found:
             continue
 
-
         # To control the number of face images to display
-        count -= 1
+
         if count > 0:
+            cv2.circle(frame, real_pupil, 2, (0, 0, 255), 1)  # show correct in red
+            cv2.circle(frame, detected_pupil, 2, (0, 255, 0), 1)  # show predicted in green
+            frame = cv2.resize(frame, None, fx=2, fy=2)  # To make it bigger
             cv2.imshow(all_files[i + 1], frame)
-            cv2.circle(frame, real_pupil, 2, (0, 0, 255), -1)
-            cv2.circle(frame, detected_pupil, 2, (0, 255, 0), 1)
-            frame = cv2.flip(frame, 1)
-            frame = cv2.resize(frame, None, fx=3, fy=3) # To make it bigger
+            print(f'{all_files[i + 1]}: Detected Pupil: {detected_pupil}, Real Pupil: {real_pupil}')
+
+        count -= 1
 
         # append to the error list
         errors_by_iris_radius.append(distance(detected_pupil, real_pupil) / radius)
         errors_distance.append(distance(detected_pupil, real_pupil))
 
 ############# Errors Divided by iris radius
+print('\n')
 print('|||========== By considering euclidean distance divided by minimum enclosing circle ==========|||')
 errors_by_iris_radius = np.array(errors_by_iris_radius)
 print('Number of images:', errors_by_iris_radius.shape)
@@ -140,8 +142,8 @@ print('Min error:', errors_by_iris_radius.min())
 
 print('Percentiles:')
 quantiles = np.quantile(errors_by_iris_radius, [0.25, 0.5, .75])
-for i,q in enumerate([0.25,0.5,0.75]):
-    print(f'{q*100}%% percentile of the error is {quantiles[i]}')
+for i, q in enumerate([0.25, 0.5, 0.75]):
+    print(f'{q * 100}% of the images has error less than {quantiles[i]}')
 
 hist = sns.histplot(errors_by_iris_radius, color='salmon')
 # hist.set(xlim=(0,30))
@@ -151,6 +153,7 @@ plt.title('Error divided by minimum enclosing circle')
 # plt.xlim(0,6)
 plt.show()
 
+print('\n')
 ######### Errors considering only the euclidean distance
 print('|||========== By considering only euclidean distance ==========|||')
 errors_distance = np.array(errors_distance)
@@ -160,9 +163,10 @@ print('Min error:', errors_distance.min())
 
 print('Percentiles:')
 quantiles = np.quantile(errors_distance, [0.25, 0.5, .75])
-for i,q in enumerate([0.25,0.5,0.75]):
-    print(f'{q*100}%% percentile of the error is {quantiles[i]}')
+for i, q in enumerate([0.25, 0.5, 0.75]):
+    print(f'{q * 100}% of the images has error less than {quantiles[i]}')
 
+# Plot the histogram of errors
 hist = sns.histplot(errors_distance, color='salmon')
 plt.xlabel('Error (Euclidean distance between real and predicted pupil)')
 plt.title('Errors considering only the euclidean distance')
