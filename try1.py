@@ -14,8 +14,9 @@ predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 all_files = sorted(os.listdir(dir))
 
-count = 20
-errors = []
+count = 3 #number of images to display
+errors_by_iris_radius = []
+errors_distance = []
 
 for i in range(len(all_files)):
     file_dir = ''.join([dir, '/', all_files[i]])
@@ -104,48 +105,68 @@ for i in range(len(all_files)):
                 # draw the contour and center of the shape on the image
 
                 # cv2.drawContours(black_bg, [cnt], -1, (0, 255, 0), 2)
-                # cv2.circle(frame, (cX, cY), 2, (0, 255, 0), -1)
+                cv2.circle(frame, (cX, cY), 2, (0, 255, 0), -1)
                 # cv2.putText(frame, f'Coordinates of pupil: ({cX},{cY})', (30, 50), 0, 0.5, (0, 0, 0))
 
                 # find radius of minimum enclosing circle
                 (x_min_enclosing_circle, y_min_enclosing_circle), radius = cv2.minEnclosingCircle(cnt)
                 break
 
+        # Skip the images from which no contour is detected
+        # (this is mostly because of closed eyes)
         if not found:
             continue
 
-        # cv2.circle(frame, real_pupil, 2, (0, 0, 255), -1)
 
-        # cv2.circle(frame, (x_left, y_left),2, (0,255,0),1)
-        # frame = cv2.flip(frame, 1)
-        # frame = cv2.resize(frame, None, fx=3,fy=3)
+        # To control the number of face images to display
+        count -= 1
+        if count > 0:
+            cv2.imshow(all_files[i + 1], frame)
+            cv2.circle(frame, real_pupil, 2, (0, 0, 255), -1)
+            cv2.circle(frame, detected_pupil, 2, (0, 255, 0), 1)
+            frame = cv2.flip(frame, 1)
+            frame = cv2.resize(frame, None, fx=3, fy=3) # To make it bigger
 
-        # cv2.imshow(all_files[i + 1], frame)
+        # append to the error list
+        errors_by_iris_radius.append(distance(detected_pupil, real_pupil) / radius)
+        errors_distance.append(distance(detected_pupil, real_pupil))
 
-        # count -= 1
-        # if count == 0:
-        #     break
+############# Errors Divided by iris radius
+print('|||========== By considering euclidean distance divided by minimum enclosing circle ==========|||')
+errors_by_iris_radius = np.array(errors_by_iris_radius)
+print('Number of images:', errors_by_iris_radius.shape)
+print('Max error:', errors_by_iris_radius.max())
+print('Min error:', errors_by_iris_radius.min())
 
-        errors.append(distance(detected_pupil, real_pupil)/radius)
+print('Percentiles:')
+quantiles = np.quantile(errors_by_iris_radius, [0.25, 0.5, .75])
+for i,q in enumerate([0.25,0.5,0.75]):
+    print(f'{q*100}%% percentile of the error is {quantiles[i]}')
 
-errors = np.array(errors)
-print('Number of images:',errors.shape)
-print('Max error:', errors.max())
-print('Min error:', errors.min())
-print('Quantiles:', np.quantile(errors, [0.25,0.5,.75]))
-hist = sns.histplot(errors, color='salmon')
+hist = sns.histplot(errors_by_iris_radius, color='salmon')
 # hist.set(xlim=(0,30))
-plt.xlabel('Error (Euclidean distance between real and predicted pupil)')
+plt.xlabel('Error (Euclidean distance between real and predicted pupil / radius of minimum enclosing circle)')
+plt.title('Error divided by minimum enclosing circle')
 # plt.xticks(range(0,5))
 # plt.xlim(0,6)
 plt.show()
 
-# hist = sns.histplot(errors, color='salmon', log_scale=True)
-# plt.xlabel('Log-scale Error (Euclidean distance between real and predicted pupil)')
-# plt.show()
-# Calculating the error
-# print(all_files[i + 1] + ': Detected Pupil:', detected_pupil, 'Real Pupil:', real_pupil)
+######### Errors considering only the euclidean distance
+print('|||========== By considering only euclidean distance ==========|||')
+errors_distance = np.array(errors_distance)
+print('Number of images:', errors_distance.shape)
+print('Max error :', errors_distance.max())
+print('Min error:', errors_distance.min())
 
+print('Percentiles:')
+quantiles = np.quantile(errors_distance, [0.25, 0.5, .75])
+for i,q in enumerate([0.25,0.5,0.75]):
+    print(f'{q*100}%% percentile of the error is {quantiles[i]}')
+
+hist = sns.histplot(errors_distance, color='salmon')
+plt.xlabel('Error (Euclidean distance between real and predicted pupil)')
+plt.title('Errors considering only the euclidean distance')
+plt.show()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

@@ -125,6 +125,7 @@ def get_eye_center(landmarks):
     # get eye center location using estimations from dlib points
     mid_eye_x = (landmarks.part(37).x + landmarks.part(38).x) // 2
 
+    # Some unsuccessful trials
     # mid_eye_x = (landmarks.part(36).x + landmarks.part(39).x)//2
 
     # mid_upper = (landmarks.part(37).y + landmarks.part(38).y) // 2
@@ -132,7 +133,7 @@ def get_eye_center(landmarks):
     # mid_eye_y = (mid_upper + mid_lower) // 2
 
     # mid_eye_y = landmarks.part(27).y
-
+    # get the y coordinates of the eye center assuming it is at the same y level for point 36 of the diagram
     mid_eye_y = landmarks.part(36).y
     center = (mid_eye_x, mid_eye_y)
 
@@ -148,7 +149,7 @@ def eye_direction_distance(landmarks, pupil):
     '''
     # get eye center
     eyeCenter = get_eye_center(landmarks)
-    # compute gaze direction by calculating the angle and the distance between the pupil and eye center
+    # compute the angle and the distance between the pupil and eye center
     angle = math.degrees(math.atan2(eyeCenter[1]-pupil[1], eyeCenter[0]-pupil[0]))
     dist = distance(pupil,eyeCenter)
 

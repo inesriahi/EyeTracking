@@ -98,14 +98,16 @@ while True:
             ## if the blinking ratio is greater than this value: detect a blink
             if blinking_ratio > 5.5:
                 cv2.putText(frame, "Blinking", (30,200), cv2.FONT_HERSHEY_DUPLEX, 0.5, (255,0,0))
-            # draw circle to segment eye center
+
+            # draw circle to find eye center (to make it as the origin for the iris (not very good idea)
             eye_center = get_eye_center(landmarks)
             cv2.circle(frame, eye_center, 2, (0, 0, 255), -1)
 
-            # Get looking direction distance: (pupil and eye center)
+            # Get looking direction distance: (for pupil and eye center)
             angle, dist = eye_direction_distance(landmarks, pupil)
             # Display the frame with detections
             cv2.putText(frame, f'angle: {angle:.4f} & distance: {dist:.3f}', (30, 100), 0, 0.5, (0, 0, 0))
+            # get the direction description in words
             cv2.putText(frame, f'Direction: {get_direction_description(angle, dist)}', (30, 150), 0, 0.5, (0, 0, 0))
             cv2.imshow('Black Bg', black_bg)
 
