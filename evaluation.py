@@ -132,8 +132,7 @@ for i in range(len(all_files)):
         errors_by_iris_radius.append(distance(detected_pupil, real_pupil) / radius)
         errors_distance.append(distance(detected_pupil, real_pupil))
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+
 ############# Errors Divided by iris radius
 print('\n')
 print('|||========== By considering euclidean distance divided by minimum enclosing circle ==========|||')
@@ -173,3 +172,6 @@ hist = sns.histplot(errors_distance, color='salmon')
 plt.xlabel('Error (Euclidean distance between real and predicted pupil)')
 plt.title('Errors considering only the euclidean distance')
 plt.show()
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
