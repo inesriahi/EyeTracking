@@ -68,9 +68,12 @@ def process_eye(eye_frame, threshold):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
     # Perform Closing operation to close small holes
     closing = cv2.morphologyEx(eye, cv2.MORPH_CLOSE, kernel)
+    # Perform Opening
+    kernel =  cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    opening = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel)
 
     # Get the original eye size by reducing its size again
-    small_eye = cv2.resize(closing, None, fx=1 / 5, fy=1 / 5)
+    small_eye = cv2.resize(opening, None, fx=1 / 5, fy=1 / 5)
 
     return small_eye
 
