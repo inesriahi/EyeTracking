@@ -44,11 +44,11 @@ An example for the real-time output results is here:
 
 ### Links
 
-- Real-time file URL: [Main](https://github.com/onshadi/EyeTracking/blob/master/main.py)
-- Evaluation file URL: [Evaluation](https://github.com/onshadi/EyeTracking/blob/master/evaluation.py)
+- Real-time file URL: [Main](https://github.com/inesriahi/EyeTracking/blob/master/main.py)
+- Evaluation file URL: [Evaluation](https://github.com/inesriahi/EyeTracking/blob/master/evaluation.py)
 
 ### Dependencies
-All the dependencies along with their corresponding version are given in [`requirments.txt`](https://github.com/onshadi/EyeTracking/blob/master/requirements.txt) :
+All the dependencies along with their corresponding version are given in [`requirments.txt`](https://github.com/inesriahi/EyeTracking/blob/master/requirements.txt) :
 ```
 numpy==1.18.5
 matplotlib==3.2.2
@@ -95,5 +95,5 @@ We have provided 5 images in `test_imgs` directory for you to experiment the sol
 
 ## Authors
 
-- Ines Riahi - [@onshadi](https://github.com/onshadi)
+- Ines Riahi - [@onshadi](https://github.com/inesriahi)
 - Aafaq Al Shidhani - [@shidhani](https://github.com/shidhani)
