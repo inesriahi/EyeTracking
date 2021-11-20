@@ -1,4 +1,4 @@
-# Controlling Mouse Cursor through Gaze for physically disabled individuals
+# Controlling Mouse Cursor through Gaze for Physically Disabled Individuals
 
 
 ## Table of contents
