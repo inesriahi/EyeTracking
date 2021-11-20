@@ -51,17 +51,17 @@ while True:
             ## Eye
             # Get the only the eye from the masked frame (with eye and white background)
             small_eye = left_eye_masked[min_y:max_y, min_x:max_x]
-            cv2.imshow("Left Eye Masked Small Eye", small_eye)
+            # cv2.imshow("Left Eye Masked Small Eye", small_eye)
             # Process the eye with the best threshold
             small_eye = process_eye(small_eye, best_threshold(small_eye))
 
             # Show the thresholded iris area in its original size
-            cv2.imshow("Small Eye resized", small_eye)
+            # cv2.imshow("Small Eye resized", small_eye)
 
             ## Frame reconstruction to replace the thresholded iris in its frame
             white_frame = np.full(gray.shape, 255, np.uint8)
             white_frame[min_y:max_y, min_x:max_x] = small_eye
-            cv2.imshow("Reconstructed Frame", white_frame)
+            # cv2.imshow("Reconstructed Frame", white_frame)
 
             # Invert the image to make the iris white as it is the object
             black_bg = cv2.bitwise_not(white_frame)
@@ -109,9 +109,10 @@ while True:
             cv2.putText(frame, f'angle: {angle:.4f} & distance: {dist:.3f}', (30, 100), 0, 0.5, (0, 0, 0))
             # get the direction description in words
             cv2.putText(frame, f'Direction: {get_direction_description(angle, dist)}', (30, 150), 0, 0.5, (0, 0, 0))
-            cv2.imshow('Black Bg', black_bg)
+            # cv2.imshow('Black Bg', black_bg)
 
         cv2.imshow("Frame", frame)
+
 
     key = cv2.waitKey(1)
     if key == 27:
