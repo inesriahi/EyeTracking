@@ -95,5 +95,5 @@ We have provided 5 images in `test_imgs` directory for you to experiment the sol
 
 ## Authors
 
-- Ines Riahi - [@onshadi](https://github.com/inesriahi)
+- Ines Riahi - [@inesriahi](https://github.com/inesriahi)
 - Aafaq Al Shidhani - [@shidhani](https://github.com/shidhani)
