@@ -82,6 +82,9 @@ For experiments, we have used the [BioID Face Database](https://www.bioid.com/fa
 
 We have provided 5 images in `test_imgs` directory for you to experiment the solution.
 
+The following compares our solution's detected pupil's coordinates versus the real coordinates:
+![](./screenshots/4.png)
+
 ## Limitations & Difficulties
 - The accuracy of eye center detection needs improvement
 - Python computational limitations
